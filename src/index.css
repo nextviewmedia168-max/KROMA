@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Khmer OS Battambang", "Battambang", ui-sans-serif, system-ui, sans-serif;
+  --font-khmer: "Khmer OS Battambang", "Battambang", "Siemreap", sans-serif;
+  
+  --color-indigo-600: #4F46E5;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc; /* slate-50 */
+}
