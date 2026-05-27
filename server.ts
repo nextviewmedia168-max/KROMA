@@ -553,21 +553,25 @@ const tasks: Record<string, { status: string; language: string; format: string; 
     // Run synchronous conversion inside request context for serverless environments (like Vercel)
     // so that the Lambda container doesn't terminate or freeze before background timers finish.
     const isVercel = !!process.env.VERCEL;
-    console.log(`[Processing] Triggered for task ${taskId}...`);
+    console.log(`[Processing] Triggered for task ${taskId} (Vercel: ${isVercel})...`);
     
-    // Trigger conversion immediately asynchronously for all environments
-    runConversion();
-    
-    // Push simulated state increments gracefully for all environments
-    let currentPct = 10;
-    const progressWatcher = setInterval(() => {
-        if (!tasks[taskId] || tasks[taskId].status === "completed" || tasks[taskId].status === "failed") {
-        clearInterval(progressWatcher);
-        return;
-        }
-        currentPct = Math.min(currentPct + 15, 95);
-        tasks[taskId].progress = currentPct;
-    }, 500);
+    if (isVercel) {
+        await runConversion();
+    } else {
+        // Trigger conversion immediately asynchronously for persistent environments
+        runConversion();
+        
+        // Push simulated state increments gracefully
+        let currentPct = 10;
+        const progressWatcher = setInterval(() => {
+            if (!tasks[taskId] || tasks[taskId].status === "completed" || tasks[taskId].status === "failed") {
+                clearInterval(progressWatcher);
+                return;
+            }
+            currentPct = Math.min(currentPct + 15, 95);
+            tasks[taskId].progress = currentPct;
+        }, 500);
+    }
 
     return res.status(202).json({ task_id: taskId, status: tasks[taskId].status });
   });

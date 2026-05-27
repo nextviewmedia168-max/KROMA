@@ -196,24 +196,26 @@ export default function App() {
       });
       
       const rawText = await response.text();
+      
       let data;
       try {
         data = JSON.parse(rawText);
       } catch (err) {
-        throw new Error(`Server returned non-JSON response: ${rawText.substring(0, 50)}`);
+         // If JSON parsing fails, we might still have a 500 error page
       }
 
       if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
+        throw new Error(data?.error || `Server Error (${response.status}): ${rawText.substring(0, 50)}`);
       }
       
+      data = JSON.parse(rawText);
       setTaskId(data.task_id);
       
     } catch (error: any) {
       console.error(error);
       setPreviewText(`Network or Server Error: ${error.message || 'Failed to connect'}. Please ensure the server is running and try again.`);
       setStatusText('Network Error');
-      setAppState('success'); // Show error state
+      setAppState('upload'); // Go back to start, not success
     }
   };
 
@@ -505,6 +507,7 @@ export default function App() {
           <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6 leading-[1.1]">
             {t.heroTitle} <span className="text-indigo-600">{t.heroHighlight}</span>
           </h1>
+          <hr className="my-8 border-slate-200" />
           <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mt-6">
             {t.heroDesc} <span className="font-semibold text-slate-800 font-khmer">{t.heroKhmer}</span>{t.heroDescEnd}
           </p>
