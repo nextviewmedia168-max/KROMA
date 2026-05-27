@@ -502,10 +502,10 @@ export default function App() {
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-start pt-12 pb-24 px-4 sm:px-6 w-full max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mb-10 mt-4">
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-4 leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 mb-6 leading-[1.1]">
             {t.heroTitle} <span className="text-indigo-600">{t.heroHighlight}</span>
           </h1>
-          <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mt-6">
             {t.heroDesc} <span className="font-semibold text-slate-800 font-khmer">{t.heroKhmer}</span>{t.heroDescEnd}
           </p>
         </div>
