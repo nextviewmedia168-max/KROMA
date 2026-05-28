@@ -46,7 +46,7 @@ async function convertDocWithGemini(fileBuffer: Buffer, language: string) {
 
   const ai = getAi();
   const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
+    model: "gemini-1.5-flash",
     contents: [
       filePart,
       `Analyze the uploaded PDF file. Reconstruct the pages into clean paragraphs with correct styles.
@@ -536,7 +536,8 @@ const tasks: Record<string, { status: string; language: string; format: string; 
           tasks[taskId].fileData = buffer;
         }
       } catch (err: any) {
-        console.error("Task failed:", err);
+        console.error("Task failed:", err.message);
+        console.error("Error stack:", err.stack);
         if (tasks[taskId]) {
           tasks[taskId].status = "failed";
           tasks[taskId].previewText = `Conversion Failed: ${err.message}`;
@@ -553,24 +554,24 @@ const tasks: Record<string, { status: string; language: string; format: string; 
     // Run synchronous conversion inside request context for serverless environments (like Vercel)
     // so that the Lambda container doesn't terminate or freeze before background timers finish.
     const isVercel = !!process.env.VERCEL;
-    console.log(`[Processing] Triggered for task ${taskId} (Vercel: ${isVercel})...`);
-    
     if (isVercel) {
-        await runConversion();
+       console.log(`[Vercel Serverless] Synchronous processing triggered for task ${taskId}...`);
+       await runConversion();
     } else {
-        // Trigger conversion immediately asynchronously for persistent environments
-        runConversion();
-        
-        // Push simulated state increments gracefully
-        let currentPct = 10;
-        const progressWatcher = setInterval(() => {
-            if (!tasks[taskId] || tasks[taskId].status === "completed" || tasks[taskId].status === "failed") {
-                clearInterval(progressWatcher);
-                return;
-            }
-            currentPct = Math.min(currentPct + 15, 95);
-            tasks[taskId].progress = currentPct;
-        }, 500);
+       console.log(`[Cloud Run / Dev Node] Background processing triggered for task ${taskId}...`);
+       // Trigger conversion immediately asynchronously
+       runConversion();
+
+       // Push simulated state increments gracefully
+       let currentPct = 10;
+       const progressWatcher = setInterval(() => {
+         if (!tasks[taskId] || tasks[taskId].status === "completed" || tasks[taskId].status === "failed") {
+            clearInterval(progressWatcher);
+            return;
+         }
+         currentPct = Math.min(currentPct + 15, 95);
+         tasks[taskId].progress = currentPct;
+       }, 500);
     }
 
     return res.status(202).json({ task_id: taskId, status: tasks[taskId].status });
