@@ -175,7 +175,7 @@ const PORT = 3000;
 // Use multer to handle file uploads in memory for demonstration
 const upload = multer({ 
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 } // 20 MB limit
+  limits: { fileSize: 4.5 * 1024 * 1024 } // 4.5 MB limit for Vercel
 });
 
 // Health endpoint

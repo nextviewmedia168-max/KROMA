@@ -22,7 +22,7 @@ const translations: Record<string, Record<string, string>> = {
     about: "About Us",
     getStarted: "Get Started",
     clickToUpload: "Click to upload or drag & drop",
-    onlyPdf: "Only PDF files up to 20MB",
+    onlyPdf: "Only PDF files up to 4.5MB",
     cancel: "Cancel",
     convertToWord: "Convert Document",
     docLanguage: "Document Language:",
@@ -79,7 +79,7 @@ const translations: Record<string, Record<string, string>> = {
     about: "អំពីយើង",
     getStarted: "ចាប់ផ្តើម",
     clickToUpload: "ចុចដើម្បីបញ្ចូលឯកសារ ឬអូសទម្លាក់ទីនេះ",
-    onlyPdf: "ត្រឹមតែឯកសារ PDF ទំហំត្រឹម 20MB ប៉ុណ្ណោះ",
+    onlyPdf: "ត្រឹមតែឯកសារ PDF ទំហំត្រឹម 4.5MB ប៉ុណ្ណោះ",
     cancel: "បោះបង់",
     convertToWord: "បម្លែងឯកសារ",
     docLanguage: "ភាសាឯកសារ៖",
@@ -169,8 +169,8 @@ export default function App() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const selectedFile = e.target.files[0];
-      if (selectedFile.size > 20 * 1024 * 1024) {
-        console.warn('File size exceeds 20MB limit.');
+      if (selectedFile.size > 4.5 * 1024 * 1024) {
+        alert('File size exceeds Vercel 4.5MB free tier limit. Please upload a smaller file.');
         return;
       }
       setFile(selectedFile);
@@ -587,8 +587,8 @@ export default function App() {
                             console.warn('Please upload a PDF file.');
                             return;
                         }
-                        if (droppedFile.size > 20 * 1024 * 1024) {
-                            console.warn('File size exceeds 20MB limit.');
+                        if (droppedFile.size > 4.5 * 1024 * 1024) {
+                            alert('File size exceeds Vercel 4.5MB free tier limit. Please upload a smaller file.');
                             return;
                         }
                         setFile(droppedFile);
