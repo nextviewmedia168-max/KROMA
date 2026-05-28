@@ -3,17 +3,9 @@ import path from "path";
 import multer from "multer";
 import { Document, Paragraph, TextRun, Packer, AlignmentType } from "docx";
 import { createServer as createViteServer } from "vite";
-import fs from "fs";
-import { createRequire } from "module";
-let pdf: any;
-try {
-  // @ts-ignore
-  pdf = require("pdf-parse");
-} catch (e) {
-  const requireFn = createRequire(import.meta.url);
-  pdf = requireFn("pdf-parse");
-}
+import pdf from "pdf-parse";
 import ExcelJS from "exceljs";
+import fs from "fs";
 
 import { GoogleGenAI, Type } from "@google/genai";
 
@@ -46,7 +38,7 @@ async function convertDocWithGemini(fileBuffer: Buffer, language: string) {
 
   const ai = getAi();
   const response = await ai.models.generateContent({
-    model: "gemini-1.5-flash",
+    model: "gemini-3.5-flash",
     contents: [
       filePart,
       `Analyze the uploaded PDF file. Reconstruct the pages into clean paragraphs with correct styles.
@@ -178,7 +170,7 @@ function normalizeKhmerText(rawText: string): string {
 }
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = 3000;
 
 // Use multer to handle file uploads in memory for demonstration
 const upload = multer({ 
@@ -198,6 +190,7 @@ app.get("/api/health", (req, res) => {
 const tasks: Record<string, { status: string; language: string; format: string; fileData?: Buffer; progress: number; previewText?: string }> = {};
 
   app.post("/api/convert-pdf", upload.single("file"), async (req, res) => {
+    console.log("DEBUG: POST /api/convert-pdf route reached");
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
@@ -578,6 +571,7 @@ const tasks: Record<string, { status: string; language: string; format: string; 
   });
 
   app.get("/api/task/:task_id", (req, res) => {
+    console.log("DEBUG: GET /api/task/:task_id route reached");
     const taskId = req.params.task_id;
     const task = tasks[taskId];
     if (!task) {
@@ -593,6 +587,7 @@ const tasks: Record<string, { status: string; language: string; format: string; 
   });
 
   app.get("/api/download/:task_id", (req, res) => {
+    console.log("DEBUG: GET /api/download/:task_id route reached");
     const taskId = req.params.task_id;
     const task = tasks[taskId];
     
@@ -617,21 +612,23 @@ const tasks: Record<string, { status: string; language: string; format: string; 
     res.status(err.status || 500).json({ error: err.message || "Internal server error" });
   });
 
-  // Catch-all for undefined /api/* routes to prevent exposing Vite's HTML fallback
+  // Catch-all for undefined route paths to prevent exposing Vite's HTML fallback
   app.use("/api/*", (req, res) => {
-    res.status(404).json({ error: `Route ${req.method} ${req.originalUrl} not found` });
+    res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
   });
 
 async function startServer() {
+  const distPath = path.join(process.cwd(), "dist");
+  const isProd = process.env.NODE_ENV === "production" || fs.existsSync(path.join(distPath, "index.html"));
+
   // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
+  if (!isProd) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     // Support client side routing in Express v4
     app.get("*", (req, res) => {
