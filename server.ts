@@ -38,7 +38,7 @@ async function convertDocWithGemini(fileBuffer: Buffer, language: string) {
 
   const ai = getAi();
   const response = await ai.models.generateContent({
-    model: "gemini-3.5-flash",
+    model: "gemini-2.0-flash",
     contents: [
       filePart,
       `Analyze the uploaded PDF file. Reconstruct the pages into clean paragraphs with correct styles.
