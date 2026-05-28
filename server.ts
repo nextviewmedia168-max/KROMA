@@ -3,7 +3,7 @@ import path from "path";
 import multer from "multer";
 import { Document, Paragraph, TextRun, Packer, AlignmentType } from "docx";
 import { createServer as createViteServer } from "vite";
-import pdf from "pdf-parse";
+import pdf from "pdf-parse/lib/pdf-parse.js";
 import ExcelJS from "exceljs";
 import fs from "fs";
 
