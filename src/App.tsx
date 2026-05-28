@@ -131,7 +131,15 @@ const translations: Record<string, Record<string, string>> = {
 export default function App() {
   const [appState, setAppState] = useState<AppState>('upload');
   const [selectedLanguage, setSelectedLanguage] = useState('Auto-Detect');
-  const [khmerFont, setKhmerFont] = useState('Khmer OS Battambang');
+  const [khmerFont, setKhmerFont] = useState(() => {
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.userAgent) {
+      const ua = window.navigator.userAgent.toLowerCase();
+      if (ua.includes('mac') || ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) {
+        return 'Khmer MN';
+      }
+    }
+    return 'Leelawadee UI'; // Standard built-in Windows 10/11 font
+  });
   const [outputFormat, setOutputFormat] = useState<'docx' | 'xlsx'>('docx');
   const [uiLang, setUiLang] = useState<'en' | 'km'>('en');
   const [file, setFile] = useState<File | null>(null);
@@ -639,11 +647,12 @@ export default function App() {
                                 onChange={(e) => setKhmerFont(e.target.value)}
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                <option value="Khmer OS Battambang">Khmer OS Battambang (Standard Windows)</option>
-                                <option value="Khmer MN">Khmer MN (Standard Mac)</option>
-                                <option value="Khmer OS Siemreap">Khmer OS Siemreap (Modern)</option>
-                                <option value="Khmer OS Content">Khmer OS Content</option>
-                                <option value="Leelawadee UI">Leelawadee UI (Windows UI)</option>
+                                <option value="Khmer OS Battambang">Khmer OS Battambang (Legacy Windows - Requires Install)</option>
+                                <option value="Khmer MN">Khmer MN / Sangam MN (Mac/iOS Built-in)</option>
+                                <option value="Khmer OS Siemreap">Khmer OS Siemreap (Requires Install)</option>
+                                <option value="Khmer OS Content">Khmer OS Content (Requires Install)</option>
+                                <option value="Leelawadee UI">Leelawadee UI (Windows 10/11 Built-in)</option>
+                                <option value="Noto Sans Khmer">Noto Sans Khmer (Google Docs / Android Built-in)</option>
                               </select>
                            </div>
                          )}

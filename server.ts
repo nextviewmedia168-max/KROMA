@@ -282,11 +282,11 @@ const tasks: Record<string, { status: string; language: string; format: string; 
 
                     const hasKhmer = /[\u1780-\u17FF]/.test(textBlock);
                     const isKhmer = hasKhmer || language.toLowerCase() === "khmer";
-                    const fontName = isKhmer ? khmerFont : "Arial";
+                    const fontName = isKhmer ? khmerFont : "Calibri";
                     const font = {
-                        ascii: fontName,
+                        ascii: "Calibri",
                         cs: fontName,
-                        hAnsi: fontName,
+                        hAnsi: "Calibri",
                         eastAsia: fontName
                     };
 
@@ -354,9 +354,9 @@ const tasks: Record<string, { status: string; language: string; format: string; 
                       document: {
                         run: {
                           font: {
-                            ascii: docFontName,
+                            ascii: "Calibri",
                             cs: docFontName,
-                            hAnsi: docFontName,
+                            hAnsi: "Calibri",
                             eastAsia: docFontName
                           },
                           size: 24,
@@ -415,12 +415,12 @@ const tasks: Record<string, { status: string; language: string; format: string; 
                 // Determine font dynamically based on content to prevent random/broken fonts
                 const hasKhmer = /[\u1780-\u17FF]/.test(extractedText);
                 const isKhmer = hasKhmer || language.toLowerCase() === "khmer";
-                const fontName = isKhmer ? khmerFont : "Arial";
+                const fontName = isKhmer ? khmerFont : "Calibri";
                 const font = {
-                    ascii: fontName,
-                    cs: fontName,
-                    hAnsi: fontName,
-                    eastAsia: fontName
+                    ascii: "Calibri",
+                     cs: fontName,
+                     hAnsi: "Calibri",
+                     eastAsia: fontName
                 };
                 
                 // Split extracted text into paragraphs, PRESERVING empty lines to retain vertical layout structure
@@ -476,10 +476,10 @@ const tasks: Record<string, { status: string; language: string; format: string; 
                       document: {
                         run: {
                           font: {
-                            ascii: fontName,
-                             cs: fontName,
-                            hAnsi: fontName,
-                            eastAsia: fontName
+                            ascii: "Calibri",
+                     cs: fontName,
+                     hAnsi: "Calibri",
+                     eastAsia: fontName
                           },
                           size: 24,
                           sizeComplexScript: 24,
