@@ -141,6 +141,7 @@ export default function App() {
   const [statusText, setStatusText] = useState('');
   const [taskId, setTaskId] = useState<string | null>(null);
   const [previewText, setPreviewText] = useState<string>('');
+  const [base64File, setBase64File] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const t = translations[uiLang];
@@ -208,6 +209,16 @@ export default function App() {
       }
       
       setTaskId(data.task_id);
+
+      if (data.status === 'completed' && data.fileData) {
+         if (data.previewText) setPreviewText(data.previewText);
+         setBase64File(data.fileData);
+         setProgress(100);
+         setStatusText('Finalizing...');
+         setTimeout(() => {
+            setAppState('success');
+         }, 500);
+      }
       
     } catch (error: any) {
       console.error(error);
@@ -256,6 +267,9 @@ export default function App() {
           if (data.previewText) {
              setPreviewText(data.previewText);
           }
+          if (data.fileData) {
+             setBase64File(data.fileData);
+          }
           setTimeout(() => {
             setAppState('success');
           }, 500); // Slight delay for smooth transition
@@ -275,6 +289,7 @@ export default function App() {
     setProgress(0);
     setStatusText('');
     setPreviewText('');
+    setBase64File(null);
     setAppState('upload');
     if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -284,6 +299,23 @@ export default function App() {
   const handleDownload = async () => {
     if (!taskId) return;
     try {
+      if (base64File) {
+        const binaryString = window.atob(base64File);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
+        const blob = new Blob([bytes], { type: outputFormat === 'xlsx' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `converted_${file?.name ? file.name.replace('.pdf', '') : 'document'}.${outputFormat}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+
       const resp = await fetch(`/api/download/${taskId}`);
       if (!resp.ok) throw new Error('Download failed');
       const blob = await resp.blob();

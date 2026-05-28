@@ -189,7 +189,7 @@ app.get("/api/health", (req, res) => {
 
 const tasks: Record<string, { status: string; language: string; format: string; fileData?: Buffer; progress: number; previewText?: string }> = {};
 
-  app.post("/api/convert-pdf", upload.single("file"), async (req, res) => {
+  app.post(["/api/convert-pdf", "/convert-pdf"], upload.single("file"), async (req, res) => {
     console.log("DEBUG: POST /api/convert-pdf route reached");
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
@@ -550,6 +550,18 @@ const tasks: Record<string, { status: string; language: string; format: string; 
     if (isVercel) {
        console.log(`[Vercel Serverless] Synchronous processing triggered for task ${taskId}...`);
        await runConversion();
+       const task = tasks[taskId];
+       if (task && task.status === 'completed' && task.fileData) {
+         return res.status(200).json({ 
+           task_id: taskId, 
+           status: task.status, 
+           progress: task.progress,
+           previewText: task.previewText,
+           fileData: task.fileData.toString('base64') 
+         });
+       } else {
+         return res.status(202).json({ task_id: taskId, status: task ? task.status : "processing" });
+       }
     } else {
        console.log(`[Cloud Run / Dev Node] Background processing triggered for task ${taskId}...`);
        // Trigger conversion immediately asynchronously
@@ -570,7 +582,7 @@ const tasks: Record<string, { status: string; language: string; format: string; 
     return res.status(202).json({ task_id: taskId, status: tasks[taskId].status });
   });
 
-  app.get("/api/task/:task_id", (req, res) => {
+  app.get(["/api/task/:task_id", "/task/:task_id"], (req, res) => {
     console.log("DEBUG: GET /api/task/:task_id route reached");
     const taskId = req.params.task_id;
     const task = tasks[taskId];
@@ -582,11 +594,12 @@ const tasks: Record<string, { status: string; language: string; format: string; 
       task_id: taskId,
       status: task.status,
       progress: task.progress,
-      previewText: task.previewText, // pass preview text to frontend when done
+      previewText: task.previewText,
+      fileData: task.fileData ? task.fileData.toString('base64') : undefined
     });
   });
 
-  app.get("/api/download/:task_id", (req, res) => {
+  app.get(["/api/download/:task_id", "/download/:task_id"], (req, res) => {
     console.log("DEBUG: GET /api/download/:task_id route reached");
     const taskId = req.params.task_id;
     const task = tasks[taskId];
@@ -619,7 +632,7 @@ const tasks: Record<string, { status: string; language: string; format: string; 
 
 async function startServer() {
   const distPath = path.join(process.cwd(), "dist");
-  const isProd = process.env.NODE_ENV === "production" || fs.existsSync(path.join(distPath, "index.html"));
+  const isProd = process.env.NODE_ENV === "production";
 
   // Vite middleware for development
   if (!isProd) {
